@@ -1,0 +1,10 @@
+lua*/
+
+lua
+luac
+
+*.o
+*.cpio
+
+files
+init
