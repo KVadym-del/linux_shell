@@ -11,9 +11,9 @@ sys.o: sys.S
 
 init: shell.o sys.o
 	g++ -Os ${INITFLAGS} \
-    -Wl,--strip-all \
+	-Wl,--strip-all \
 	-Wl,-z,noexec \
-    shell.o sys.o -o init
+	shell.o sys.o -o init
 
 files: init lua
 	echo init >> files
