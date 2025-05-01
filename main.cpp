@@ -1,7 +1,9 @@
 #include <cstring>
+#include <stdio.h>
 #include <string>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <vector>
 
 extern "C"
 {
@@ -9,7 +11,12 @@ extern "C"
 }
 
 constexpr const size_t PREALLOC_COMMAND_SIZE = 255;
+
 constexpr const char* PROMPT = "#> ";
+constexpr const char* UP_ARROW = "\033[A";
+constexpr const char* DOWN_ARROW = "\033[B";
+
+static std::vector<std::string> g_history;
 
 int main(void)
 {
@@ -30,11 +37,16 @@ int main(void)
         else
             command[res] = '\0';
 
+        g_history.push_back(command);
+
+        if (0 == std::strcmp(command.c_str(), "exit"))
+            _exit(0);
+
         pid_t pid = fork();
         if (pid == 0)
         {
             execve(command.c_str(), nullptr, nullptr);
-            break;
+            _exit(0);
         }
         else
         {
