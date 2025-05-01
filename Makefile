@@ -1,5 +1,7 @@
-SHELLFLAGS = -Os -fno-ident -fno-asynchronous-unwind-tables -fno-stack-protector -fomit-frame-pointer -static -static-libstdc++
-INITFLAGS = -Os -fno-ident -fno-asynchronous-unwind-tables -fno-stack-protector -fomit-frame-pointer -static
+SHELLFLAGS ?= -Os -fno-ident -fno-asynchronous-unwind-tables -fno-stack-protector -fomit-frame-pointer -static -static-libstdc++
+INITFLAGS ?= -Os -fno-ident -fno-asynchronous-unwind-tables -fno-stack-protector -fomit-frame-pointer -static
+
+LUA ?= echo lua >> files
 
 all: soft_clean build_iso
 
@@ -15,9 +17,9 @@ init: shell.o sys.o
 	-Wl,-z,noexec \
 	shell.o sys.o -o init
 
-files: init lua
+files: init
 	echo init >> files
-	echo lua >> files
+	${LUA}
 
 init.cpio: files
 	cat files | cpio -H newc -o > init.cpio
