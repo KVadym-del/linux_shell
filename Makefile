@@ -13,12 +13,12 @@ dist_build:
 files: dist_build
 	cd ./bin; \
 	echo init >> files; \
-	${LUA}; \
-	${VIM}; \
+	${LUA} \
+	${VIM} \
 	echo ls >> files; \
 	echo mkdir >> files; \
 	echo touch >> files; \
-	echo rm >> files; 
+	echo rm >> files
 
 init.cpio: files
 	cd ./bin; \
