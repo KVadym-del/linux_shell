@@ -6,6 +6,4 @@ luac
 *.o
 *.cpio
 
-files
-init
-ls
+bin/*

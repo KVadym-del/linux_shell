@@ -3,6 +3,7 @@ BINDIR ?= bin
 SRCDIR ?= src
 
 LUA ?= echo lua >> files
+VIM ?= echo vim >> files
 
 all: soft_clean build_iso
 
@@ -13,7 +14,11 @@ files: dist_build
 	cd ./bin; \
 	echo init >> files; \
 	${LUA}; \
-	echo ls >> files;
+	${VIM}; \
+	echo ls >> files; \
+	echo mkdir >> files; \
+	echo touch >> files; \
+	echo rm >> files; 
 
 init.cpio: files
 	cd ./bin; \
@@ -29,7 +34,7 @@ run: build_iso
 	qemu-system-x86_64 -cdrom arch/x86/boot/image.iso
 
 soft_clean:
-	rm -f ${BINDIR}/ls ${BINDIR}/init ${BINDIR}/*.cpio ${BINDIR}/files
+	rm -f ${BINDIR}/ls ${BINDIR}/mkdir ${BINDIR}/init ${BINDIR}/*.cpio ${BINDIR}/files
 	rm -f ${BUILDDIR}/shell.o ${BUILDDIR}/sys.o
 	rm -f *.o
 	rm -f *.a
