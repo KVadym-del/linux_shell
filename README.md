@@ -6,7 +6,7 @@
 *linux_shell (TO BE RENAMED)* is a tiny linux distribution.
 
 ## Features
-- Currently there is no feature. :(
+- Currently there is no features at all. :(
 
 ## Getting Started
 To correctly build the project, you need to have the following folder structure:
