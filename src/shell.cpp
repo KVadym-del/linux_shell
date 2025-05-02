@@ -12,6 +12,13 @@
 #include <unistd.h>
 #include <vector>
 
+#include "include/util.hpp"
+
+constexpr const char BACKSPACE = '\x7f';
+constexpr const char CTR_C = '\x03';
+constexpr const char CTR_D = '\x04';
+constexpr const char ESC_SEQ = '\x1b';
+
 constexpr const size_t PREALLOC_COMMAND_SIZE = 255;
 constexpr const size_t MAX_HISTORY = 100;
 constexpr const char* PROMPT_PRELUDE = "#> ";
@@ -20,18 +27,6 @@ struct termios g_orig_termios{};
 
 static std::vector<std::string> g_history{};
 static size_t g_history_index{0};
-
-inline static void print(std::string_view str)
-{
-    if (write(STDOUT_FILENO, str.data(), str.size()) == -1 && errno != EINTR)
-        _exit(1);
-}
-
-inline static void print_error(std::string_view str)
-{
-    if (write(STDERR_FILENO, str.data(), str.size()) == -1 && errno != EINTR)
-        _exit(1);
-}
 
 inline static void disable_raw_mode();
 
@@ -88,16 +83,6 @@ inline static void add_history(const std::string& command)
     g_history_index = g_history.size();
 }
 
-inline static void clear_line()
-{
-    print("\r\033[K");
-}
-
-inline static void clear_screen()
-{
-    print("\033[H\033[J");
-}
-
 inline static void handle_cd(const std::vector<std::string>& args)
 {
     if (args.size() < 2)
@@ -125,53 +110,6 @@ inline static void handle_cd(const std::vector<std::string>& args)
             print_error(strerror(errno));
             print_error("\r\n");
         }
-    }
-}
-
-inline static void handle_ls(const std::vector<std::string>& args)
-{
-    if (args.size() < 2)
-    {
-        print_error("ERROR: ls: No directory specified\r\n");
-        return;
-    }
-
-    DIR* dir = opendir(args[1].c_str());
-    if (dir == nullptr)
-    {
-        print_error("ERROR: ls: Unable to open directory '");
-        print_error(args[1]);
-        print_error("': ");
-        print_error(strerror(errno));
-        print_error("\r\n");
-        return;
-    }
-
-    struct dirent* entry;
-    while ((entry = readdir(dir)) != nullptr)
-    {
-        if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
-        {
-            if (entry->d_type == DT_DIR)
-            {
-                print("\033[1;34m");
-            }
-            else
-            {
-                print("\033[0m");
-            }
-            print(entry->d_name);
-            print("\r\n\033[0m");
-        }
-    }
-
-    if (closedir(dir) == -1)
-    {
-        print_error("ERROR: ls: Unable to close directory '");
-        print_error(args[1]);
-        print_error("': ");
-        print_error(strerror(errno));
-        print_error("\r\n");
     }
 }
 
@@ -213,11 +151,6 @@ inline static void execute_command(const std::string& command_str)
     if (args_storage[0] == "cd")
     {
         handle_cd(args_storage);
-        return;
-    }
-    else if (args_storage[0] == "ls")
-    {
-        handle_ls(args_storage);
         return;
     }
     else if (args_storage[0] == "history")
@@ -324,7 +257,7 @@ int main(void)
             g_history_index = g_history.size();
             break;
 
-        case '\x7f':
+        case BACKSPACE:
             if (!command.empty())
             {
                 command.pop_back();
@@ -332,20 +265,20 @@ int main(void)
             }
             break;
 
-        case '\x03':
+        case CTR_C:
             print("^C\r\n");
             command.clear();
             g_history_index = g_history.size();
             break;
 
-        case '\x04':
+        case CTR_D:
             if (command.empty())
             {
                 goto exit_loop;
             }
             break;
 
-        case '\x1b': {
+        case ESC_SEQ: {
             char seq[3];
             if (read(STDIN_FILENO, &seq[0], 1) != 1)
                 continue;

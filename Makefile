@@ -9,8 +9,11 @@ LUA ?= echo lua >> files
 
 all: soft_clean build_iso
 
-shell.o: ${SRCDIR}/main.cpp
-	g++ -c ${SHELLFLAGS} -o ${BUILDDIR}/shell.o ${SRCDIR}/main.cpp
+ls: ${SRCDIR}/ls.cpp
+	g++ ${SHELLFLAGS} -o ${BINDIR}/ls ${SRCDIR}/ls.cpp
+
+shell.o: ${SRCDIR}/shell.cpp
+	g++ -c ${SHELLFLAGS} -o ${BUILDDIR}/shell.o ${SRCDIR}/shell.cpp
 
 sys.o: ${SRCDIR}/sys.S
 	as ${SRCDIR}/sys.S -o ${BUILDDIR}/sys.o
@@ -19,12 +22,14 @@ init: shell.o sys.o
 	g++ -Os ${INITFLAGS} \
 	-Wl,--strip-all \
 	-Wl,-z,noexec \
-	${BUILDDIR}/shell.o ${BUILDDIR}/sys.o -o ${BINDIR}/init
+	${BUILDDIR}/shell.o ${BUILDDIR}/sys.o \
+	-o ${BINDIR}/init
 
-files: init
+files: ls init 
 	cd ./bin; \
 	echo init >> files; \
-	${LUA};
+	${LUA}; \
+	echo ls >> files;
 
 init.cpio: files
 	cd ./bin; \
@@ -51,7 +56,7 @@ soft_clean:
 	rm -f ../linux/init.cpio
 	rm -f *.img
 	rm -f *.gz
-	rm -f files
+	rm -f ${BINDIR}/files
 
 clean: soft_clean
 	cd ../linux; \
