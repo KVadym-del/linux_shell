@@ -1,5 +1,5 @@
-SHELLFLAGS ?= -O3 -fno-ident -fno-asynchronous-unwind-tables -fno-stack-protector -fomit-frame-pointer -static -static-libstdc++
 INITFLAGS ?= -O3 -fno-ident -fno-asynchronous-unwind-tables -fno-stack-protector -fomit-frame-pointer -static
+SHELLFLAGS ?= ${INITFLAGS} -static-libstdc++
 
 BUILDDIR ?= ../build
 BINDIR ?= ../bin
