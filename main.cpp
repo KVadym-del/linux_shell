@@ -4,6 +4,7 @@
 #include <string>
 #include <string_view>
 #include <sys/wait.h>
+#include <termios.h>
 #include <unistd.h>
 #include <vector>
 
@@ -13,6 +14,7 @@ extern "C"
 }
 
 constexpr const size_t PREALLOC_COMMAND_SIZE = 255;
+constexpr const size_t MAX_HISTORY = 100;
 
 constexpr const char* PROMPT_PRELUDE = "#> ";
 constexpr const char* LEDT_ARROW = "\033[D";
@@ -20,14 +22,57 @@ constexpr const char* RIGHT_ARROW = "\033[C";
 
 static std::string g_promt{PROMPT_PRELUDE};
 
+struct termios g_orig_termios{};
+
 static std::vector<std::string> g_history{};
 static size_t g_history_index{0};
 
-static void print(std::string_view str)
+inline static void print(std::string_view str)
 {
     size_t res = write(1, str.data(), str.size());
     if (res == -1)
         _exit(1);
+}
+
+inline static void print_error(std::string_view str)
+{
+    size_t res = write(2, str.data(), str.size());
+    if (res == -1)
+        _exit(1);
+}
+
+inline static void die(std::string_view str)
+{
+    print_error(str);
+    _exit(1);
+}
+
+inline static void disable_raw_mode()
+{
+    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &g_orig_termios) == -1)
+        die("tcsetattr");
+
+    print("\r\n");
+}
+
+inline static void add_history(std::string_view command)
+{
+    if (command.empty())
+        return;
+
+    if (g_history.size() > 0 && g_history[g_history.size() - 1] == command)
+        return;
+
+    if (g_history.size() >= MAX_HISTORY)
+        g_history.erase(g_history.begin());
+
+    g_history.push_back(command.data());
+    g_history_index = g_history.size();
+}
+
+inline static void clear_line()
+{
+    print("\r\033[K");
 }
 
 int main(void)
@@ -36,14 +81,12 @@ int main(void)
     command.reserve(PREALLOC_COMMAND_SIZE);
     while (true)
     {
-        print(g_promt);
-
         command.clear();
         size_t res = read(0, command.data(), command.capacity());
         if (res == -1)
             return 1;
 
-        print(command.c_str());
+        print(g_promt);
         if (res > 0 && command[res - 1] == '\n')
             command[res - 1] = '\0';
         else
