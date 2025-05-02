@@ -117,7 +117,6 @@ inline static void handle_cd(const std::vector<std::string>& args)
     }
     else
     {
-
         if (chdir(args[1].c_str()) != 0)
         {
             print_error("ERROR: cd '");
@@ -153,8 +152,16 @@ inline static void handle_ls(const std::vector<std::string>& args)
     {
         if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
         {
+            if (entry->d_type == DT_DIR)
+            {
+                print("\033[1;34m");
+            }
+            else
+            {
+                print("\033[0m");
+            }
             print(entry->d_name);
-            print("\r\n");
+            print("\r\n\033[0m");
         }
     }
 
