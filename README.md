@@ -17,7 +17,6 @@ base_linux/
 ```
 ```bash
 cd linux
-make -j8
 ```
 Then, you need o configure linux before building it:
 * 64-bit kernel
