@@ -31,7 +31,7 @@ make -j8
 After building linux kernel, you can build linux_shell:
 ```bash
 cd ../linux_shell
-make LUA= VIM= make
+LUA= VIM= make
 ```
 *If you have any static build of lua or vim you can move them to the `linux_shell/bin` folder or put the paths into LUA= VIM=*
 

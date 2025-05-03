@@ -87,7 +87,6 @@ inline static void handle_cd(const std::vector<std::string>& args)
 {
     if (args.size() < 2)
     {
-
         const char* home = getenv("HOME");
         if (home == nullptr)
         {
