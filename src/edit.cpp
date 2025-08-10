@@ -14,9 +14,9 @@
 #include "include/util.hpp"
 
 static std::string fileName{};
-static struct termios orig_termios{};
-static bool raw_enabled = false;
-static bool alt_screen = false;
+static struct termios origTermios{};
+static bool rawEnabled = false;
+static bool altScreen = false;
 
 constexpr char ctrl_key(char c)
 {
@@ -28,7 +28,7 @@ constexpr char BACKSPACE{0x7f};
 
 static bool dirty{false};
 static bool running{true};
-static volatile sig_atomic_t got_signal = 0;
+static volatile sig_atomic_t gotSignal = 0;
 
 static std::vector<std::string> lines{""};
 static size_t cx{0};
@@ -49,25 +49,25 @@ static void die(const char* msg)
 
 static void disable_raw()
 {
-    if (raw_enabled)
+    if (rawEnabled)
     {
-        tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
-        raw_enabled = false;
+        tcsetattr(STDIN_FILENO, TCSAFLUSH, &origTermios);
+        rawEnabled = false;
     }
-    if (alt_screen)
+    if (altScreen)
     {
         print("\x1b[?1049l");
-        alt_screen = false;
+        altScreen = false;
     }
 }
 
 static void enable_raw()
 {
-    if (raw_enabled)
+    if (rawEnabled)
         return;
-    if (tcgetattr(STDIN_FILENO, &orig_termios) == -1)
+    if (tcgetattr(STDIN_FILENO, &origTermios) == -1)
         die("tcgetattr");
-    termios raw = orig_termios;
+    termios raw = origTermios;
     raw.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
     raw.c_oflag &= ~(OPOST);
     raw.c_cflag |= (CS8);
@@ -76,24 +76,24 @@ static void enable_raw()
     raw.c_cc[VTIME] = 0;
     if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1)
         die("tcsetattr");
-    raw_enabled = true;
-    if (!alt_screen)
+    rawEnabled = true;
+    if (!altScreen)
     {
         print("\x1b[?1049h\x1b[H");
-        alt_screen = true;
+        altScreen = true;
     }
 }
 
-static void handle_signal(int)
+static void handle_signal(int32_t)
 {
-    got_signal = 1;
+    gotSignal = 1;
 }
 
 static void open_file()
 {
     if (fileName.empty())
         return;
-    int fd = open(fileName.c_str(), O_RDONLY);
+    int32_t fd = open(fileName.c_str(), O_RDONLY);
     if (fd == -1)
     {
         lines.assign(1, "");
@@ -167,7 +167,7 @@ static void editor_insert_char(char c)
         dirty = true;
         return;
     }
-    lines[cy].insert(lines[cy].begin() + static_cast<long>(cx), c);
+    lines[cy].insert(lines[cy].begin() + static_cast<int32_t>(cx), c);
     cx++;
     dirty = true;
 }
@@ -186,7 +186,7 @@ static void editor_backspace()
         dirty = true;
         return;
     }
-    lines[cy].erase(lines[cy].begin() + static_cast<long>(cx) - 1);
+    lines[cy].erase(lines[cy].begin() + static_cast<int32_t>(cx) - 1);
     cx--;
     dirty = true;
 }
@@ -306,7 +306,7 @@ static void process_key()
     }
 }
 
-int main(int argc, char* argv[])
+int32_t main(int32_t argc, char* argv[])
 {
     if (argc < 2)
     {
@@ -328,7 +328,7 @@ int main(int argc, char* argv[])
 
     while (running)
     {
-        if (got_signal)
+        if (gotSignal)
             running = false;
         refresh_screen();
         process_key();

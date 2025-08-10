@@ -200,7 +200,7 @@ inline static void execute_command(const std::string& command_str)
     else
     {
 
-        int status;
+        int32_t status{};
         if (waitpid(pid, &status, 0) == -1)
         {
             if (errno != EINTR)
@@ -213,7 +213,7 @@ inline static void execute_command(const std::string& command_str)
     }
 }
 
-int main(void)
+int32_t main(void)
 {
     std::string command{};
     command.reserve(PREALLOC_COMMAND_SIZE);

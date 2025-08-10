@@ -1,10 +1,11 @@
 #include <string_view>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <vector>
 
 #include "include/util.hpp"
 
-int main(int argc, char* argv[])
+int32_t main(int32_t argc, char* argv[])
 {
     auto args = make_args(argc, argv);
     auto prog = prog_name(args[0]);

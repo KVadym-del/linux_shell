@@ -1,6 +1,7 @@
 #include <dirent.h>
 #include <string.h>
 #include <string_view>
+#include <sys/types.h>
 #include <unistd.h>
 #include <vector>
 
@@ -14,7 +15,7 @@ static inline void set_color(bool is_dir)
         print("\033[0m");
 }
 
-int main(int argc, char* argv[])
+int32_t main(int32_t argc, char* argv[])
 {
     auto args = make_args(argc, argv);
     auto prog = prog_name(args[0]);
