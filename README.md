@@ -58,36 +58,17 @@ qemu-system-x86_64 -cdrom arch/x86/boot/image.iso
 This should boot into the minimal environment and drop you into the shell (via `init`).
 
 ## Built-in Programs
-| Program | Description |
-|---------|-------------|
+| Program | Description                                                     |
+| ------- | --------------------------------------------------------------- |
 | `init`  | Entry point; sets up and launches the minimal interactive shell |
-| `ls`    | List directory contents (directories in blue) |
-| `mkdir` | Create a directory (mode 0755) |
-| `rm`    | Remove files (no verbose success output) |
-| `touch` | Create or truncate files |
-| `cat`   | Concatenate files to standard output (supports `-` for stdin) |
-| `edit`  | Simple in-terminal text editor (Ctrl-S save, Ctrl-Q quit) |
+| `ls`    | List directory contents (directories in blue)                   |
+| `mkdir` | Create a directory (mode 0755)                                  |
+| `rm`    | Remove files (no verbose success output)                        |
+| `touch` | Create or truncate files                                        |
+| `cat`   | Concatenate files to standard output (supports `-` for stdin)   |
+| `edit`  | Simple in-terminal text editor (Ctrl-S save, Ctrl-Q quit)       |
 
 Location: all binaries live in `bin/` after `make`.
-
-## Example Session
-```
-#> ls
-bin
-#> touch test.txt
-#> edit test.txt   (edit, type text, Ctrl-S, Ctrl-Q)
-#> cat test.txt
-Hello world
-#> mkdir data
-#> ls
-bin
-data
-test.txt
-#> rm test.txt
-#> ls
-bin
-data
-```
 
 ## Contributing / Development Notes
 - Code aims to avoid iostream and use raw syscalls + small helpers.
