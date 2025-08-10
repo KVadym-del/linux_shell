@@ -1,5 +1,4 @@
 #include <fcntl.h>
-#include <string.h>
 #include <string_view>
 #include <vector>
 
@@ -7,32 +6,17 @@
 
 int main(int argc, char* argv[])
 {
-    std::vector<std::string_view> args(argv, argv + argc);
+    auto args = make_args(argc, argv);
+    auto prog = prog_name(args[0]);
 
-    if (args.size() < 2)
+    if (!require_args(prog, args.size(), 2, "No file specified"))
+        return 1;
+
+    FD fd(open(args[1].data(), O_CREAT | O_WRONLY | O_TRUNC, 0644));
+    if (!fd)
     {
-        print_error("ERROR: touch: No file specified\r\n");
+        print_errno(prog, "open", args[1]);
         return 1;
     }
-
-    int fd = open(args[1].data(), O_CREAT | O_WRONLY | O_TRUNC, 0644);
-    if (fd == -1)
-    {
-        print_error("ERROR: touch '");
-        print_error(args[1]);
-        print_error("': ");
-        print_error(strerror(errno));
-        print_error("\r\n");
-        return 1;
-    }
-
-    if (close(fd) == -1)
-    {
-        print_error("ERROR: touch '");
-        print_error(args[1]);
-        print_error("': ");
-        print_error(strerror(errno));
-        print_error("\r\n");
-        return 1;
-    }
+    return 0;
 }

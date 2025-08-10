@@ -4,7 +4,13 @@ SHELLFLAGS ?= ${INITFLAGS} -static-libstdc++
 BUILDDIR ?= ../build
 BINDIR ?= ../bin
 
-all: ls mkdir touch rm init
+all: cat edit ls mkdir touch rm init
+
+cat: cat.cpp
+	g++ ${SHELLFLAGS} -o ${BINDIR}/cat cat.cpp
+
+edit: edit.cpp
+	g++ ${SHELLFLAGS} -o ${BINDIR}/edit edit.cpp
 
 ls: ls.cpp
 	g++ ${SHELLFLAGS} -o ${BINDIR}/ls ls.cpp

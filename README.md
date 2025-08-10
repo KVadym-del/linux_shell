@@ -5,30 +5,46 @@
 
 *linux_shell (TO BE RENAMED)* is a tiny linux distribution.
 
-## Features
-- Currently there is no features at all. :(
+## Current Status / Features
+- Minimal interactive shell (built into `init`) with command history and basic line editing.
+- Statically linked toy implementations of several classic Unix utilities.
+- Simple text editor (`edit`) with:
+  - Raw mode terminal handling
+  - Basic cursor movement (arrows)
+  - Insert / backspace / newline
+  - Save (Ctrl-S) & Quit (Ctrl-Q)
+  - Dirty indicator `*`
+- Colorized `ls` (directories in blue).
+- Reusable utility helpers (argument parsing, error printing, RAII FDs / DIR, full-buffer write).
 
-## Getting Started
-To correctly build the project, you need to have the following folder structure:
+## Planned / Ideas
+- Command completion
+- Enhanced editor (scrolling, paging, search)
+- Optional Lua / Vim integration when provided statically
+- Configuration & tests
+
+## Directory Layout Expectation
 ```
 base_linux/
-├── linux_shell
-└── linux
+├── linux            (Linux kernel source tree)
+└── linux_shell      (this repository)
 ```
+Work from inside `linux` first to configure & build the kernel, then build `linux_shell`.
+
+## Kernel Configuration (required options)
+Ensure at least:
+- 64-bit kernel
+- ELF binary format support
+- Initial RAM filesystem / initrd support (CONFIG_BLK_DEV_INITRD=y, CONFIG_INITRAMFS_SOURCE or similar)
+
+Then build the kernel:
 ```bash
 cd linux
-```
-Then, you need o configure linux before building it:
-* 64-bit kernel
-* Enable ELF support
-* Initial RAM filesystem and RAM disk (initramfs/initrd) support
-
-After that, you can build the project with:
-```bash
-make -j8
+make -j$(nproc)
 ```
 
-After building linux kernel, you can build linux_shell:
+## Building linux_shell
+From the sibling directory:
 ```bash
 cd ../linux_shell
 LUA= VIM= make
@@ -39,13 +55,45 @@ At the end you would be able to run the following command:
 ```bash
 qemu-system-x86_64 -cdrom arch/x86/boot/image.iso
 ```
-which will boot the linux.
+This should boot into the minimal environment and drop you into the shell (via `init`).
 
-## Buildin programs
-* `ls` - list directory contents
-* `mkdir` - make directories
-* `rm` - remove files or directories
-* `touch` - create empty files
+## Built-in Programs
+| Program | Description |
+|---------|-------------|
+| `init`  | Entry point; sets up and launches the minimal interactive shell |
+| `ls`    | List directory contents (directories in blue) |
+| `mkdir` | Create a directory (mode 0755) |
+| `rm`    | Remove files (no verbose success output) |
+| `touch` | Create or truncate files |
+| `cat`   | Concatenate files to standard output (supports `-` for stdin) |
+| `edit`  | Simple in-terminal text editor (Ctrl-S save, Ctrl-Q quit) |
+
+Location: all binaries live in `bin/` after `make`.
+
+## Example Session
+```
+#> ls
+bin
+#> touch test.txt
+#> edit test.txt   (edit, type text, Ctrl-S, Ctrl-Q)
+#> cat test.txt
+Hello world
+#> mkdir data
+#> ls
+bin
+data
+test.txt
+#> rm test.txt
+#> ls
+bin
+data
+```
+
+## Contributing / Development Notes
+- Code aims to avoid iostream and use raw syscalls + small helpers.
+- Utilities share common logic in `src/include/util.hpp` (argument helpers, error formatting, RAII wrappers).
+- Static linking flags are tuned for size; adjust `Makefile` if debugging (e.g. remove `-O3`, add `-g`).
+- Patches improving safety, clarity, or reducing duplication are welcome.
 
 ## License
-This project is licensed under the GNU GENERAL PUBLIC LICENSE - see the [LICENSE](License) file for details.
+GNU GENERAL PUBLIC LICENSE — see [LICENSE](License) for details.
